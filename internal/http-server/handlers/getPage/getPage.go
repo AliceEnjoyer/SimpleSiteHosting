@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"github.com/AliceEnjoyer/SimpleSiteHosting/lib/api/response"
 	"github.com/go-chi/chi/middleware"
@@ -13,6 +14,14 @@ import (
 
 type Response struct {
 	response.Response
+}
+
+type contextKey struct {
+	name string
+}
+
+func (k *contextKey) String() string {
+	return "chi render context value " + k.name
 }
 
 func New(log *slog.Logger, pagesPath string) http.HandlerFunc {
@@ -57,11 +66,21 @@ func New(log *slog.Logger, pagesPath string) http.HandlerFunc {
 
 			return
 		}
-		render.HTML(w, r, string(pageBytes))
+		switch filepath.Ext(pageName) {
+		case ".html":
+			render.HTML(w, r, string(pageBytes))
+		case ".css":
+			w.Header().Set("Content-Type", "text/css;")
+			w.Write(pageBytes)
+		case ".js":
+			w.Header().Set("Content-Type", "text/plain;")
+			w.Write(pageBytes)
+		case ".jpg":
+			w.Header().Set("Content-Type", "image/jpeg;")
+			w.Write(pageBytes)
+		default:
 
-		style, _ := readPage(pagesPath, "style.css")
-		styleBytes, _ := io.ReadAll(style)
-		render.Data(w, r, []byte("<style>"+string(styleBytes)+"</style>"))
+		}
 	}
 }
 

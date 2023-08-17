@@ -1,6 +1,6 @@
 env: "dev" # local, dev, prod 
 
-pages_path: "./pages/"
+pages_path: "/home/sergey/code/yCHSBC/html/site/"
 
 http_server: 
   address: "localhost:8082"
